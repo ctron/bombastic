@@ -1,4 +1,5 @@
 use crate::app_state::AppState;
+use crate::error::Error;
 use crate::search;
 use crate::service::guac::GuacService;
 use actix_web::{
@@ -24,7 +25,7 @@ pub(crate) fn configure(auth: Option<Arc<Authenticator>>) -> impl FnOnce(&mut Se
                 .service(web::resource("/dependencies").to(get_dependencies))
                 .service(web::resource("/dependents").to(get_dependents))
                 // these must come last, otherwise the path parameter will eat the rest
-                .service(web::resource("/{id}").to(package_get_mock))
+                .service(web::resource("/{id}").to(package_get))
                 .service(web::resource("/{id}/related-products").to(package_related_products)),
         );
     }
@@ -59,12 +60,7 @@ pub async fn package_search(
     for item in data.result {
         let item = item.document;
         m.push(PackageInfo {
-            purl: item.purl.into(),
-            name: item.purl_name.into(),
-            namespace: item.purl_namespace.into(),
-            version: item.purl_version.into(),
-            package_type: item.purl_type.into(),
-            supplier: item.supplier.into(),
+            purl: item.purl,
             vulnerabilities: vec![],
         });
     }
@@ -88,11 +84,29 @@ pub async fn package_search(
         ("id" = Url, Path, description = "The ID of the package to retrieve")
     )
 )]
-pub async fn package_get_mock(path: web::Path<String>) -> actix_web::Result<HttpResponse> {
-    let _id = path.into_inner();
+pub async fn package_get(guac: web::Data<GuacService>, path: web::Path<String>) -> Result<HttpResponse, Error> {
+    let purl = path.into_inner();
 
-    let pkgs = make_mock_data();
-    Ok(HttpResponse::Ok().json(&pkgs[0]))
+    let results = guac.certify_vex(&purl).await?;
+    let vulns = results
+        .iter()
+        .flat_map(|vex| {
+            vex.vulnerability
+                .vulnerability_ids
+                .iter()
+                .map(|id| V11yRef {
+                    cve: id.vulnerability_id.clone(),
+                    severity: "unknown".to_string(),
+                })
+                .collect::<Vec<V11yRef>>()
+        })
+        .collect::<Vec<V11yRef>>();
+
+    let pkg = PackageInfo {
+        purl,
+        vulnerabilities: vulns,
+    };
+    Ok(HttpResponse::Ok().json(&pkg))
 }
 
 #[derive(Debug, serde::Deserialize, IntoParams)]
@@ -123,67 +137,6 @@ pub async fn package_related_products(
 
     let result = PackageProductDetails { related_products };
     Ok(HttpResponse::Ok().json(&result))
-}
-
-fn make_mock_data() -> Vec<PackageInfo> {
-    let packages = vec![
-        PackageInfo {
-            name: "arc".to_string().into(),
-            namespace: "io.quarkus.arc".to_string().into(),
-            version: "2.16.2.Final".to_string().into(),
-            package_type: "maven".to_string().into(),
-            purl: "pkg:maven/io.quarkus.arc/arc@2.16.2.Final?type=jar".to_string().into(),
-            supplier: "Organization: Red Hat".to_string().into(),
-            vulnerabilities: vec![
-                V11yRef {
-                    cve: "CVE-2023-5511".to_string(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "low".to_string(),
-                },
-                V11yRef {
-                    cve: "CVE-2023-5511".to_string(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "medium".to_string(),
-                },
-                V11yRef {
-                    cve: "CVE-2023-5511".to_string(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "high".to_string(),
-                },
-                V11yRef {
-                    cve: "CVE-2023-5511".to_string(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "critical".to_string(),
-                },
-            ],
-        },
-        PackageInfo {
-            name: "openssl".to_string().into(),
-            namespace: "redhat".to_string().into(),
-            version: "1.1.1k-7.el8_6".to_string().into(),
-            package_type: "rpm".to_string().into(),
-            purl: Some("pkg:rpm/redhat/openssl@1.1.1k-7.el8_6".to_string()),
-            supplier: "Organization: Red Hat".to_string().into(),
-            vulnerabilities: vec![
-                V11yRef {
-                    cve: "cve-2023-0286".into(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "low".to_string(),
-                },
-                V11yRef {
-                    cve: "cve-2023-0286".into(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "medium".to_string(),
-                },
-                V11yRef {
-                    cve: "cve-2023-0286".into(),
-                    href: "https://access.redhat.com/security/cve/cve-2023-0286".into(),
-                    severity: "critical".to_string(),
-                },
-            ],
-        },
-    ];
-    packages
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, IntoParams)]

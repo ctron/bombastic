@@ -6,30 +6,53 @@ mod upload;
 use analytics_next::TrackingEvent;
 use anyhow::bail;
 use bombastic_model::prelude::SBOM;
-use gloo_utils::window;
 use inspect::Inspect;
+use packageurl::PackageUrl;
 use patternfly_yew::prelude::*;
 use serde_json::{json, Value};
 use spog_ui_utils::{
     analytics::*,
     config::*,
     hints::{Hint as HintView, Hints},
+    tracking_event,
 };
-use std::rc::Rc;
+use std::{rc::Rc, str::FromStr};
 use upload::Upload;
 use yew::prelude::*;
+use yew_more_hooks::prelude::*;
 
-pub struct ClickLearn;
+tracking_event!(ClickLearn: "Click SBOM scanner learn" => None);
+tracking_event!(Reset: "Reset SBOM scanner" => None);
 
-impl From<ClickLearn> for TrackingEvent<'static> {
-    fn from(_: ClickLearn) -> Self {
+pub struct ParseOutcome<'a>(&'a Result<SBOM, anyhow::Error>);
+
+impl<'a> From<ParseOutcome<'a>> for TrackingEvent<'static> {
+    fn from(value: ParseOutcome<'a>) -> Self {
         (
-            "Click SBOM scanner learn",
-            json!({
-                "page": window().location().href().ok(),
-            }),
+            "SBOM preflight check",
+            match &value.0 {
+                Ok(value) => json!({
+                    "ok": {
+                        "type": value.type_str(),
+                    }
+                }),
+                Err(err) => json!({"err": err.to_string()}),
+            },
         )
             .into()
+    }
+}
+
+fn is_supported_package(purl: &str) -> bool {
+    match PackageUrl::from_str(purl) {
+        Ok(package) => {
+            package.ty() == "maven"
+                || package.ty() == "gradle"
+                || package.ty() == "npm"
+                || package.ty() == "gomodules"
+                || package.ty() == "pip"
+        }
+        Err(_) => false,
     }
 }
 
@@ -42,13 +65,52 @@ fn parse(data: &[u8]) -> Result<SBOM, anyhow::Error> {
             // re-parse to check for the spec version
             let json = serde_json::from_slice::<Value>(data).ok();
             let spec_version = json.as_ref().and_then(|json| json["specVersion"].as_str());
-            match spec_version {
-                Some("1.3") => {}
-                Some(other) => bail!("Unsupported CycloneDX version: {other}"),
-                None => bail!("Unable to detect CycloneDX version"),
+
+            let supported_packages = json.as_ref().map(|json| {
+                if let Some(components) = json["components"].as_array() {
+                    let are_all_supported_packages = components
+                        .iter()
+                        .filter_map(|external_ref| external_ref["purl"].as_str())
+                        .all(is_supported_package);
+                    are_all_supported_packages
+                } else {
+                    false
+                }
+            });
+
+            match (spec_version, supported_packages) {
+                (Some("1.3"), Some(true)) => {}
+                (Some("1.3"), Some(false)) => bail!(
+                    "Unsupported packages detected. Supported packages: 'maven', 'gradle', 'npm', 'gomodules', 'pip'"
+                ),
+                (Some(other), _) => bail!("Unsupported CycloneDX version: {other}"),
+                (None, _) => bail!("Unable to detect CycloneDX version"),
             }
         }
-        _ => {}
+        SBOM::SPDX(_bom) => {
+            let json = serde_json::from_slice::<Value>(data).ok();
+
+            let supported_packages = json.as_ref().map(|json| {
+                if let Some(packages) = json["packages"].as_array() {
+                    let are_all_supported_packages = packages
+                        .iter()
+                        .filter_map(|package| package["externalRefs"].as_array())
+                        .flatten()
+                        .filter_map(|external_ref| external_ref["referenceLocator"].as_str())
+                        .all(is_supported_package);
+                    are_all_supported_packages
+                } else {
+                    false
+                }
+            });
+
+            match supported_packages {
+                Some(true) => {}
+                _ => bail!(
+                    "Unsupported packages detected. Supported packages: 'maven', 'gradle', 'npm', 'gomodules', 'pip'"
+                ),
+            }
+        }
     }
 
     Ok(sbom)
@@ -56,6 +118,7 @@ fn parse(data: &[u8]) -> Result<SBOM, anyhow::Error> {
 
 #[function_component(Scanner)]
 pub fn scanner() -> Html {
+    let analytics = use_analytics();
     let content = use_state_eq(|| None::<Rc<String>>);
     let onsubmit = use_callback(content.clone(), |data, content| content.set(Some(data)));
 
@@ -65,14 +128,19 @@ pub fn scanner() -> Html {
             .and_then(|data| parse(data.as_bytes()).ok().map(|sbom| (data.clone(), Rc::new(sbom))))
     });
 
-    let onvalidate = use_callback((), |data: Rc<String>, ()| match parse(data.as_bytes()) {
-        Ok(_sbom) => Ok(data),
-        Err(err) => Err(format!("Failed to parse SBOM as CycloneDX 1.3: {err}")),
+    let onvalidate = use_callback(analytics.clone(), |data: Rc<String>, analytics| {
+        let result = parse(data.as_bytes());
+        analytics.track(ParseOutcome(&result));
+        match result {
+            Ok(_sbom) => Ok(data),
+            Err(err) => Err(format!("Failed to parse SBOM as CycloneDX 1.3: {err}")),
+        }
     });
 
     // allow resetting the form
-    let onreset = use_callback(content.clone(), |_, content| {
+    let onreset = use_callback((content.clone(), analytics.clone()), move |_, (content, analytics)| {
         content.set(None);
+        analytics.track(Reset);
     });
 
     let config = use_config();
@@ -108,8 +176,12 @@ pub struct CommonHeaderProperties {
 #[function_component(CommonHeader)]
 fn common_header(props: &CommonHeaderProperties) -> Html {
     let config = use_config();
+    let analytics = use_analytics();
 
     let onlearn = use_tracking(|_, _| ClickLearn, ());
+    let onreset = use_map(props.onreset.clone(), move |callback| {
+        callback.reform(|_| ()).wrap_tracking(analytics.clone(), |_| Reset)
+    });
 
     html!(
         <PageSection sticky={[PageSectionSticky::Top]} variant={PageSectionVariant::Light}>
@@ -134,12 +206,12 @@ fn common_header(props: &CommonHeaderProperties) -> Html {
                     </Content>
                 </FlexItem>
                 <FlexItem modifiers={[FlexModifier::Align(Alignment::Right), FlexModifier::Align(Alignment::End)]}>
-                    if let Some(onreset) = &props.onreset {
+                    if let Some(onreset) = onreset {
                         <Button
                             label={"Scan another"}
                             icon={Icon::Redo}
                             variant={ButtonVariant::Secondary}
-                            onclick={onreset.reform(|_|())}
+                            onclick={onreset}
                         />
                     }
                 </FlexItem>

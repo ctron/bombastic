@@ -156,7 +156,7 @@ guac:
 oidcClients:
   frontend:
     issuerUrl: ${ISSUER_URL}
-    scopes: "openid id.username"
+    scopes: "openid email id.username"
     clientId:
       value: trusted-content-frontend
   walker:
@@ -181,3 +181,6 @@ oidcClients:
       value: trusted-content-api
 dataset:
   enabled: false
+  enabledJob: ${{DATASET_ENABLED_JOB}}
+  suspendJob: ${{DATASET_SUSPEND_JOB}}
+  scheduleJob: ${DATASET_SCHEDULE_JOB}

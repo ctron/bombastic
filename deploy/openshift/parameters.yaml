@@ -134,7 +134,7 @@ parameters:
   value: "info"
 - name: CRDA_URL
   required: false
-  value: https://rhda.rhcloud.com/
+  value: https://rhda.rhcloud.com/api/v4/analysis
 - name: BOMBASTIC_WALKER_SUSPEND
   value: "false"
 - name: V11Y_WALKER_SUSPEND
@@ -153,3 +153,9 @@ parameters:
   value: trustification-service
 - name: INITIAL_BACKEND_JSON
   value: "{}"
+- name: DATASET_ENABLED_JOB
+  value: "true"
+- name: DATASET_SUSPEND_JOB
+  value: "true"
+- name: DATASET_SCHEDULE_JOB
+  value: "0 * * * *"

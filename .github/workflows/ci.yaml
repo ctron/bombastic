@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup component add clippy
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin/
@@ -102,6 +102,12 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get install -y libsasl2-dev
+
       - name: Check
         run: cargo check
 
@@ -119,7 +125,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: rustup component add clippy
       - run: rustup target add wasm32-unknown-unknown
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin/
@@ -154,7 +160,7 @@ jobs:
       - formatting
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin/

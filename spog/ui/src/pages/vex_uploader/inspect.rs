@@ -1,7 +1,7 @@
 use super::CommonHeader;
 use patternfly_yew::prelude::*;
 use reqwest::Body;
-use spog_ui_backend::{use_backend, SBOMService};
+use spog_ui_backend::{use_backend, VexService};
 use spog_ui_common::error::components::Error;
 use spog_ui_navigation::AppRoute;
 use std::{rc::Rc, time::Duration};
@@ -24,7 +24,7 @@ pub fn inspect(props: &InspectProperties) -> Html {
     let upload = {
         use_async_with_cloned_deps(
             move |raw| async move {
-                let service = SBOMService::new(backend, access_token);
+                let service = VexService::new(backend, access_token);
                 service.upload(Body::from((*raw).clone())).await.map(Rc::new)
             },
             props.raw.clone(),
@@ -42,7 +42,7 @@ pub fn inspect(props: &InspectProperties) -> Html {
                         </PageSection>
                     ),
                     UseAsyncState::Ready(Ok(data)) => html!(
-                        <Redirect sbom_id={data.clone()}/>
+                        <Redirect vex_id={data.clone()}/>
                     ),
                     UseAsyncState::Ready(Err(_)) => html!(
                         <Error title="Error" message="Error while uploading the file" />
@@ -55,7 +55,7 @@ pub fn inspect(props: &InspectProperties) -> Html {
 
 #[derive(Properties, Clone, PartialEq, Eq)]
 pub struct RedirectProps {
-    sbom_id: Rc<String>,
+    vex_id: Rc<String>,
 }
 
 #[function_component(Redirect)]

@@ -79,7 +79,8 @@ fn authenticated_page(props: &ChildrenProperties) -> Html {
                     if config.features.scanner {
                         <NavRouterItem<AppRoute> to={AppRoute::Scanner}>{ "Scan SBOM" }</NavRouterItem<AppRoute>>
                     }
-                    <NavRouterItem<AppRoute> to={AppRoute::Uploader}>{ "Upload SBOM" }</NavRouterItem<AppRoute>>
+                    <NavRouterItem<AppRoute> to={AppRoute::SbomUploader}>{ "Upload SBOM" }</NavRouterItem<AppRoute>>
+                    <NavRouterItem<AppRoute> to={AppRoute::VexUploader}>{ "Upload CSAF" }</NavRouterItem<AppRoute>>
                     if config.features.extend_section {
                         <NavExpandable title="Extend">
                             if let Ok(url) = backend.join(Endpoint::Bombastic, "/swagger-ui/") {
@@ -225,7 +226,8 @@ fn render(route: AppRoute, config: &spog_model::config::Configuration) -> Html {
 
         AppRoute::Chicken => html!(<pages::Chicken/>),
         AppRoute::Scanner if config.features.scanner => html!(<pages::Scanner/>),
-        AppRoute::Uploader => html!(<pages::Uploader/>),
+        AppRoute::SbomUploader => html!(<pages::Uploader/>),
+        AppRoute::VexUploader => html!(<pages::VexUploader/>),
 
         AppRoute::Sbom(View::Search { query }) if config.features.dedicated_search => {
             html!(<pages::Sbom {query} />)

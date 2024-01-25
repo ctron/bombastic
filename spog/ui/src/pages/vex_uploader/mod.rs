@@ -1,20 +1,29 @@
 mod inspect;
 
-use crate::pages::scanner::parse;
-use crate::pages::scanner::upload::Upload;
 use inspect::Inspect;
 use patternfly_yew::prelude::*;
-use spog_ui_utils::config::*;
+use spog_ui_components::upload_file::UploadFile;
 use std::rc::Rc;
 use yew::prelude::*;
 use yew_more_hooks::prelude::*;
 
-#[function_component(Uploader)]
-pub fn uploader() -> Html {
+const EMPTY_BODY_CONTENT: &str = r#"
+<div>
+    <p>Start by <strong>dragging and dropping a file here</strong> or clicking the <strong>Load a CSAF</strong> button.</p>
+</div>
+"#;
+
+pub fn parse(data: &[u8]) -> Result<csaf::Csaf, anyhow::Error> {
+    let vex = serde_json::from_slice::<csaf::Csaf>(data)?;
+    Ok(vex)
+}
+
+#[function_component(VexUploader)]
+pub fn vex_uploader() -> Html {
     let content = use_state_eq(|| None::<Rc<String>>);
     let onsubmit = use_callback(content.clone(), |data, content| content.set(Some(data)));
 
-    let sbom = use_memo(content.clone(), |content| {
+    let vex = use_memo(content.clone(), |content| {
         content
             .as_ref()
             .and_then(|data| parse(data.as_bytes()).ok().map(|sbom| (data.clone(), Rc::new(sbom))))
@@ -24,7 +33,7 @@ pub fn uploader() -> Html {
         let result = parse(data.as_bytes());
         match result {
             Ok(_sbom) => Ok(data),
-            Err(err) => Err(format!("Failed to parse SBOM as CycloneDX 1.3: {err}")),
+            Err(err) => Err(format!("Failed to parse CSAF: {err}")),
         }
     });
 
@@ -33,7 +42,7 @@ pub fn uploader() -> Html {
         content.set(None);
     });
 
-    match &*sbom {
+    match &*vex {
         Some((raw, _bom)) => {
             html!(<Inspect {onreset} raw={(*raw).clone()} />)
         }
@@ -43,7 +52,14 @@ pub fn uploader() -> Html {
                     <CommonHeader />
 
                     <PageSection variant={PageSectionVariant::Light} fill=true>
-                        <Upload primary_btn_text="Upload SBOM" {onsubmit} {onvalidate} />
+                        <UploadFile
+                            state_title="Get started by uploading your CSAF file"
+                            state_content={Html::from_html_unchecked(AttrValue::from(EMPTY_BODY_CONTENT))}
+                            primary_action_text="Load a CSAF"
+                            submit_btn_text="Upload CSAF"
+                            {onsubmit}
+                            {onvalidate}
+                        />
                     </PageSection>
                 </>
             )
@@ -59,8 +75,6 @@ pub struct CommonHeaderProperties {
 
 #[function_component(CommonHeader)]
 fn common_header(props: &CommonHeaderProperties) -> Html {
-    let config = use_config();
-
     let onreset = use_map(props.onreset.clone(), move |callback| callback.reform(|_| ()));
 
     html!(
@@ -68,19 +82,9 @@ fn common_header(props: &CommonHeaderProperties) -> Html {
             <Flex>
                 <FlexItem>
                     <Content>
-                        <Title>{"Upload an SBOM"}</Title>
+                        <Title>{"Upload a CSAF file"}</Title>
                         <p>
-                            {"Load an existing CycloneDX 1.3 or SPDX 2.2 file"}
-                            if let Some(url) = &config.scanner.documentation_url {
-                                {" or "}
-                                <a
-                                    href={url.to_string()} target="_blank"
-                                    class="pf-v5-c-button pf-m-link pf-m-inline"
-                                >
-                                    {"learn about creating an SBOM"}
-                                </a>
-                            }
-                            { "." }
+                            {"Load an existing CSAF file."}
                         </p>
                     </Content>
                 </FlexItem>

@@ -1,5 +1,5 @@
 use crate::Event;
-use aws_config::SdkConfig;
+use aws_config::{BehaviorVersion, SdkConfig};
 use aws_credential_types::credential_fn::provide_credentials_fn;
 use aws_credential_types::provider::SharedCredentialsProvider;
 use aws_sdk_sqs::config::Region;
@@ -10,6 +10,7 @@ use aws_sdk_sqs::{
 impl From<aws_sdk_sqs::Error> for crate::Error {
     fn from(e: aws_sdk_sqs::Error) -> Self {
         match e {
+            #[allow(deprecated)]
             aws_sdk_sqs::Error::Unhandled(_) => Self::Critical(e.to_string()),
             _ => Self::Transient(e.to_string()),
         }
@@ -31,6 +32,7 @@ impl SqsEventBus {
         let region = Region::new(region.into());
         let config = SdkConfig::builder()
             .region(region)
+            .behavior_version(BehaviorVersion::latest())
             .credentials_provider(SharedCredentialsProvider::new(provide_credentials_fn(move || {
                 let creds = creds.clone();
                 async { Ok(creds) }
@@ -93,7 +95,7 @@ impl SqsConsumer {
         let (result, idx, _) = futures::future::select_all(queue_futs).await;
         let topic = &self.queues[idx];
         let message: ReceiveMessageOutput = result?;
-        if let Some(messages) = message.messages() {
+        if let Some(messages) = message.messages {
             if let Some(message) = messages.first() {
                 return Ok(Some(SqsEvent {
                     queue: topic.as_str(),

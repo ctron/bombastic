@@ -203,6 +203,12 @@ checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
 name = "base64"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ea22880d78093b0cbe17c89f64a7d457941e65759157ec6cb31a31d652b05e5"
+
+[[package]]
+name = "base64"
 version = "0.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ba43ea6f343b788c8764558649e08df62f86c6ef251fdaeb1ffd010a9ae50a2"
@@ -1553,6 +1559,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonwebtokens"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fb4c5f203abfb17d5f30a9f8e44c91c222fe5dcff9d6f57090167c4cfc22b70"
+dependencies = [
+ "base64 0.20.0",
+ "pem",
+ "regex",
+ "ring",
+ "serde",
+ "serde_json",
+ "simple_asn1",
+]
+
+[[package]]
 name = "language-tags"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1676,6 +1697,17 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "608e7659b5c3d7cba262d894801b9ec9d00de989e8a82bd4bef91d08da45cdc0"
+dependencies = [
+ "autocfg",
+ "num-integer",
+ "num-traits",
 ]
 
 [[package]]
@@ -1906,8 +1938,8 @@ checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
 
 [[package]]
 name = "patternfly-yew"
-version = "0.5.5"
-source = "git+https://github.com/ctron/patternfly-yew?rev=29c0790334c2514358b8a2cf3d34e30cf3d01d8a#29c0790334c2514358b8a2cf3d34e30cf3d01d8a"
+version = "0.6.0"
+source = "git+https://github.com/patternfly-yew/patternfly-yew?rev=74e20e4429248cbc3b2c8085b9a4f8d9002fe456#74e20e4429248cbc3b2c8085b9a4f8d9002fe456"
 dependencies = [
  "chrono",
  "gloo-events 0.2.0",
@@ -1930,6 +1962,15 @@ dependencies = [
  "yew",
  "yew-hooks",
  "yew-nested-router",
+]
+
+[[package]]
+name = "pem"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8835c273a76a90455d7344889b0964598e3316e2a79ede8e36f16bdcf2228b8"
+dependencies = [
+ "base64 0.13.1",
 ]
 
 [[package]]
@@ -2642,6 +2683,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "simple_asn1"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adc4e5204eb1910f40f9cfa375f6f05b68c3abac4b6fd879c8ff5e7ae8a0a085"
+dependencies = [
+ "num-bigint",
+ "num-traits",
+ "thiserror",
+ "time",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2989,6 +3042,7 @@ version = "0.1.0"
 dependencies = [
  "analytics-next",
  "gloo-storage 0.3.0",
+ "jsonwebtokens",
  "log",
  "openidconnect",
  "patternfly-yew",
@@ -3826,14 +3880,16 @@ dependencies = [
 
 [[package]]
 name = "yew-nested-router"
-version = "0.4.0"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f398a0cbe7e8ef1333414afacd20400ffa6b685fe914423275d723f7f903a9cb"
+checksum = "e0661392a774d6713c453c959e2654f971f1c61bb470faa2ad5e654c2df40c60"
 dependencies = [
  "gloo-events 0.2.0",
- "gloo-history 0.2.0",
  "gloo-utils 0.2.0",
+ "js-sys",
  "log",
+ "serde",
+ "serde_json",
  "urlencoding",
  "wasm-bindgen",
  "web-sys",
@@ -3843,9 +3899,9 @@ dependencies = [
 
 [[package]]
 name = "yew-nested-router-macros"
-version = "0.4.0"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f54fbea868d4691113743ccdb5d71485d3f528598da335384a0f1acc2238e2ff"
+checksum = "075bd5b69cf9c0bbc5132c4a99a589e3878a2e0419bab880bed43a648d9e7c2d"
 dependencies = [
  "convert_case",
  "darling 0.20.3",
@@ -3856,9 +3912,9 @@ dependencies = [
 
 [[package]]
 name = "yew-oauth2"
-version = "0.8.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a027a8eb1818da6962bdfcb110b25390c9cb0d5d8a0696b24fd89f54e43e533"
+checksum = "1f5e4b596730b7fa38d8aa3e1afdab43f13793dd92371287f4779e001595222a"
 dependencies = [
  "async-trait",
  "gloo-storage 0.3.0",
@@ -3871,6 +3927,7 @@ dependencies = [
  "openidconnect",
  "reqwest",
  "serde",
+ "time",
  "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",

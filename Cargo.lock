@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "actix"
-version = "0.13.1"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cba56612922b907719d4a01cf11c8d5b458e7d3dba946d0435f20f58d6795ed2"
+checksum = "dc9ef49f64074352f73ef9ec8c060a5f5799c96715c986a17f10933c3da2955c"
 dependencies = [
  "actix-macros",
  "actix-rt",
@@ -1488,7 +1488,6 @@ dependencies = [
  "kube",
  "log",
  "packageurl",
- "parking_lot",
  "reqwest",
  "serde",
  "serde_json",
@@ -1549,6 +1548,16 @@ checksum = "4e2e4afe60d7dd600fdd3de8d0f08c2b7ec039712e3b6137ff98b7004e82de4f"
 dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
+]
+
+[[package]]
+name = "bstr"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "542f33a8835a0884b006a0c3df3dadd99c0c3f296ed26c2fdc8028e01ad6230c"
+dependencies = [
+ "memchr",
+ "serde",
 ]
 
 [[package]]
@@ -1783,10 +1792,6 @@ dependencies = [
  "clap",
  "collector-osv",
  "collector-snyk",
- "log",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -1794,10 +1799,8 @@ name = "collector-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "log",
  "reqwest",
  "serde",
- "serde_json",
  "trustification-auth",
 ]
 
@@ -1807,14 +1810,12 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
- "async-trait",
  "chrono",
  "clap",
  "collector-client",
  "cvss",
  "derive_more",
  "env_logger 0.11.1",
- "futures",
  "guac",
  "log",
  "packageurl",
@@ -1837,13 +1838,10 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
- "async-trait",
  "chrono",
  "clap",
  "collector-client",
- "derive_more",
  "env_logger 0.11.1",
- "futures",
  "guac",
  "hide",
  "libtest-with",
@@ -1872,10 +1870,6 @@ dependencies = [
  "anyhow",
  "clap",
  "collectorist-api",
- "log",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -1896,7 +1890,6 @@ dependencies = [
  "humantime",
  "humantime-serde",
  "log",
- "prometheus",
  "reqwest",
  "serde",
  "serde_json",
@@ -1917,15 +1910,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "derive_more",
- "humantime",
- "humantime-serde",
- "log",
  "reqwest",
  "serde",
  "serde_json",
- "tokio",
  "trustification-auth",
- "url",
 ]
 
 [[package]]
@@ -2026,7 +2014,8 @@ checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
 [[package]]
 name = "cpe"
 version = "0.1.3"
-source = "git+https://github.com/trustification/cpe-rs?rev=dc2c5661d436410cc9562596ab16a2e771261eb2#dc2c5661d436410cc9562596ab16a2e771261eb2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "057058c8e0554286108e0c882dec126a21e0712304dbc20dc6b20da9d295eef6"
 dependencies = [
  "derive_builder",
  "language-tags",
@@ -2161,7 +2150,7 @@ dependencies = [
  "rustsec",
  "serde",
  "serde_json",
- "serde_with 3.5.1",
+ "serde_with",
  "tempfile",
  "url",
 ]
@@ -2257,12 +2246,12 @@ dependencies = [
 [[package]]
 name = "cyclonedx-bom"
 version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e88c12b3b03bafb6c87f5fea49ce137f8b9ff5b89735b2a5474277492ac2b72"
+source = "git+https://github.com/carlosthe19916/cyclonedx-rust-cargo?branch=issue-615-trustification#4445530b39f1a6fd61743db725e755173c30db9a"
 dependencies = [
  "base64 0.21.7",
- "http 0.2.11",
+ "fluent-uri",
  "once_cell",
+ "ordered-float 4.2.0",
  "packageurl",
  "regex",
  "serde",
@@ -2589,6 +2578,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "enumset"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "226c0da7462c13fb57e5cc9e0dc8f0635e7d27f276a3a7fd30054647f669007d"
+dependencies = [
+ "enumset_derive",
+]
+
+[[package]]
+name = "enumset_derive"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e08b6c6ab82d70f08844964ba10c7babb716de2ecaeab9be5717918a5177d3af"
+dependencies = [
+ "darling 0.20.4",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
+
+[[package]]
 name = "env_filter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2685,10 +2695,6 @@ dependencies = [
  "anyhow",
  "clap",
  "exhort-api",
- "log",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -2700,10 +2706,8 @@ dependencies = [
  "anyhow",
  "clap",
  "collectorist-client",
- "derive_more",
  "env_logger 0.11.1",
  "exhort-model",
- "futures",
  "guac",
  "lenient_semver",
  "log",
@@ -2727,8 +2731,6 @@ dependencies = [
 name = "exhort-model"
 version = "0.1.0"
 dependencies = [
- "log",
- "packageurl",
  "serde",
  "serde_json",
  "utoipa",
@@ -2741,14 +2743,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "futures",
  "guac",
- "hex",
  "log",
- "prometheus",
- "rand 0.8.5",
- "serde",
- "serde_json",
  "strum 0.26.1",
  "strum_macros 0.26.1",
  "tokio",
@@ -2819,6 +2815,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0a9a50dc1d06d264964cb7d080d4142e1e1b134e9aacac1226ea024e6ed7a7cc"
 dependencies = [
  "time",
+]
+
+[[package]]
+name = "fluent-uri"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17c704e9dbe1ddd863da1e6ff3567795087b1eb201ce80d8fa81162e1516500d"
+dependencies = [
+ "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -3095,6 +3100,19 @@ dependencies = [
  "openssl-probe",
  "openssl-sys",
  "url",
+]
+
+[[package]]
+name = "globset"
+version = "0.4.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "759c97c1e17c55525b57192c06a267cda0ac5210b222d6b82189a2338fa1c13d"
+dependencies = [
+ "aho-corasick",
+ "bstr",
+ "fnv",
+ "log",
+ "regex",
 ]
 
 [[package]]
@@ -4492,18 +4510,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "okapi"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a64853d7ab065474e87696f7601cee817d200e86c42e04004e005cb3e20c3c5"
-dependencies = [
- "log",
- "schemars",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4689,6 +4695,15 @@ name = "ordered-float"
 version = "3.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1e1c390732d15f1d48471625cd92d154e66db2c56645e29a9cd26f4699f72dc"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "ordered-float"
+version = "4.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a76df7075c7d4d01fdcb46c912dd17fba5b60c78ea480b475f2b6ab6f666584e"
 dependencies = [
  "num-traits",
 ]
@@ -5486,7 +5501,6 @@ dependencies = [
  "js-sys",
  "log",
  "mime",
- "mime_guess",
  "native-tls",
  "once_cell",
  "percent-encoding",
@@ -5520,7 +5534,6 @@ name = "reservoir-api"
 version = "0.1.0"
 dependencies = [
  "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -6144,22 +6157,6 @@ dependencies = [
 
 [[package]]
 name = "serde_with"
-version = "2.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07ff71d2c147a7b57362cead5e22f772cd52f6ab31cfcd9edcd7f6aeb2a0afbe"
-dependencies = [
- "base64 0.13.1",
- "chrono",
- "hex",
- "indexmap 1.9.3",
- "serde",
- "serde_json",
- "serde_with_macros 2.3.3",
- "time",
-]
-
-[[package]]
-name = "serde_with"
 version = "3.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f5c9fdb6b00a489875b22efd4b78fe2b363b72265cc5f6eb2e2b9ee270e6140c"
@@ -6171,20 +6168,8 @@ dependencies = [
  "indexmap 2.2.1",
  "serde",
  "serde_json",
- "serde_with_macros 3.5.1",
+ "serde_with_macros",
  "time",
-]
-
-[[package]]
-name = "serde_with_macros"
-version = "2.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "881b6f881b17d13214e5d494c939ebab463d01264ce1811e9d4ac3a882e7695f"
-dependencies = [
- "darling 0.20.4",
- "proc-macro2",
- "quote",
- "syn 2.0.48",
 ]
 
 [[package]]
@@ -6417,20 +6402,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "snyk"
-version = "0.1.0"
-source = "git+https://github.com/dejanb/snyk-rs.git?branch=main#c889b573fca005cec95bb7bd0cf0dd6c2e33edc3"
-dependencies = [
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with 2.3.3",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "socket2"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6528,11 +6499,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "log",
- "serde",
- "serde_json",
  "spog-api",
- "tokio",
 ]
 
 [[package]]
@@ -6549,29 +6516,22 @@ dependencies = [
  "async-trait",
  "bombastic-model",
  "bytes",
- "chrono",
  "clap",
  "collectorist-client",
  "csaf",
  "cve",
  "cvss",
- "derive_more",
- "env_logger 0.11.1",
  "exhort-model",
  "futures",
  "guac",
  "hide",
  "http 0.2.11",
  "log",
- "mime",
- "okapi",
  "packageurl",
- "prometheus",
  "reqwest",
  "serde",
  "serde_json",
  "serde_yaml",
- "snyk",
  "spdx-rs",
  "spog-model",
  "thiserror",
@@ -6591,7 +6551,6 @@ dependencies = [
  "v11y-client",
  "v11y-model",
  "vexination-model",
- "zstd 0.13.0",
 ]
 
 [[package]]
@@ -7802,9 +7761,6 @@ dependencies = [
  "collectorist",
  "exhort",
  "exporter",
- "log",
- "serde",
- "serde_json",
  "spog",
  "tokio",
  "trustification-admin",
@@ -7820,18 +7776,13 @@ dependencies = [
  "bombastic-model",
  "clap",
  "env_logger 0.10.2",
- "futures",
  "log",
  "regex",
  "reqwest",
- "serde",
- "serde_json",
- "tokio",
  "trustification-auth",
  "trustification-common",
  "trustification-infrastructure",
  "url",
- "urlencoding",
  "vexination-model",
 ]
 
@@ -7842,7 +7793,6 @@ dependencies = [
  "anyhow",
  "clap",
  "humantime",
- "humantime-serde",
  "log",
  "segment",
  "serde",
@@ -7911,7 +7861,6 @@ name = "trustification-event-bus"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "async-trait",
  "aws-config",
  "aws-credential-types",
  "aws-sdk-sqs",
@@ -7929,7 +7878,6 @@ dependencies = [
 name = "trustification-index"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "bytesize",
  "clap",
  "crc32fast",
@@ -7961,10 +7909,7 @@ dependencies = [
  "anyhow",
  "clap",
  "futures",
- "hex",
  "log",
- "prometheus",
- "rand 0.8.5",
  "serde",
  "serde_json",
  "thiserror",
@@ -7973,7 +7918,6 @@ dependencies = [
  "trustification-index",
  "trustification-infrastructure",
  "trustification-storage",
- "zstd 0.13.0",
 ]
 
 [[package]]
@@ -8002,7 +7946,6 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "thiserror",
  "tokio",
  "tracing-bunyan-formatter",
  "tracing-opentelemetry",
@@ -8015,7 +7958,6 @@ dependencies = [
 name = "trustification-storage"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-compression",
  "async-stream",
  "bombastic-model",
@@ -8043,7 +7985,6 @@ dependencies = [
  "actix-web",
  "anyhow",
  "serde",
- "serde_json",
  "utoipa",
  "vergen",
 ]
@@ -8261,10 +8202,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "log",
- "serde",
- "serde_json",
- "tokio",
  "v11y-api",
  "v11y-indexer",
  "v11y-walker",
@@ -8277,23 +8214,17 @@ dependencies = [
  "actix-web",
  "actix-web-httpauth",
  "anyhow",
- "chrono",
  "clap",
  "derive_more",
  "env_logger 0.11.1",
- "futures",
- "humantime",
- "humantime-serde",
  "log",
  "prometheus",
- "reqwest",
  "serde",
  "serde_json",
  "sha1",
  "tempdir",
  "thiserror",
  "tokio",
- "tracing",
  "trustification-api",
  "trustification-auth",
  "trustification-common",
@@ -8311,7 +8242,6 @@ name = "v11y-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "log",
  "reqwest",
  "serde",
  "serde_json",
@@ -8334,36 +8264,20 @@ dependencies = [
  "serde",
  "serde_json",
  "sikula",
- "tar",
  "time",
  "tokio",
  "trustification-api",
  "trustification-index",
  "v11y-model",
- "zstd 0.13.0",
 ]
 
 [[package]]
 name = "v11y-indexer"
 version = "0.1.0"
 dependencies = [
- "actix-web",
  "anyhow",
- "chrono",
  "clap",
- "cve",
- "env_logger 0.11.1",
- "futures",
- "humantime",
- "humantime-serde",
- "log",
- "prometheus",
- "serde",
- "serde_json",
- "sqlx",
- "time",
  "tokio",
- "tracing",
  "trustification-event-bus",
  "trustification-index",
  "trustification-indexer",
@@ -8371,16 +8285,13 @@ dependencies = [
  "trustification-storage",
  "v11y-index",
  "v11y-model",
- "walkdir",
 ]
 
 [[package]]
 name = "v11y-model"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "chrono",
- "log",
  "serde",
  "serde_json",
  "sikula",
@@ -8394,7 +8305,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "env_logger 0.11.1",
  "log",
  "prometheus",
  "serde",
@@ -8499,10 +8409,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "log",
- "serde",
- "serde_json",
- "tokio",
  "vexination-api",
  "vexination-indexer",
  "vexination-walker",
@@ -8519,15 +8425,10 @@ dependencies = [
  "clap",
  "csaf",
  "derive_more",
- "hex",
  "log",
- "packageurl",
  "prometheus",
- "rand 0.8.5",
  "serde",
  "serde_json",
- "sha2 0.10.8",
- "thiserror",
  "tokio",
  "trustification-api",
  "trustification-auth",
@@ -8538,7 +8439,6 @@ dependencies = [
  "utoipa-swagger-ui",
  "vexination-index",
  "vexination-model",
- "zstd 0.12.4",
 ]
 
 [[package]]
@@ -8547,18 +8447,16 @@ version = "0.1.0"
 dependencies = [
  "cpe",
  "csaf",
- "env_logger 0.10.2",
+ "env_logger 0.11.1",
  "log",
  "serde",
  "serde_json",
  "sikula",
- "tar",
  "time",
  "tokio",
  "trustification-api",
  "trustification-index",
  "vexination-model",
- "zstd 0.12.4",
 ]
 
 [[package]]
@@ -8568,13 +8466,6 @@ dependencies = [
  "anyhow",
  "clap",
  "csaf",
- "futures",
- "hex",
- "log",
- "prometheus",
- "rand 0.8.5",
- "serde",
- "serde_json",
  "tokio",
  "trustification-event-bus",
  "trustification-index",
@@ -8582,7 +8473,6 @@ dependencies = [
  "trustification-infrastructure",
  "trustification-storage",
  "vexination-index",
- "zstd 0.12.4",
 ]
 
 [[package]]
@@ -8605,16 +8495,12 @@ dependencies = [
  "clap",
  "csaf",
  "csaf-walker",
- "hex",
  "humantime",
  "log",
- "packageurl",
  "prometheus",
- "rand 0.8.5",
  "reqwest",
  "serde",
  "serde_json",
- "sha2 0.10.8",
  "time",
  "tokio",
  "trustification-auth",
@@ -9118,8 +9004,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "enumset",
+ "globset",
  "reqwest",
  "strum 0.25.0",
+ "walkdir",
+ "which 5.0.0",
  "xshell",
 ]
 

@@ -1,7 +1,8 @@
-use std::fmt::Formatter;
+use std::fmt::{format, Formatter};
 
 use cyclonedx_bom::errors::JsonReadError;
 use cyclonedx_bom::prelude::Validate;
+use cyclonedx_bom::validation::{ValidationError, ValidationErrorsKind};
 use tracing::{info_span, instrument};
 
 #[derive(Debug)]
@@ -48,6 +49,23 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl SBOM {
+    fn check_message(errors: ValidationErrorsKind) -> String {
+        match errors {
+            ValidationErrorsKind::Field(validationErrors) => {
+                let mut messages = String::new();
+                for ve in validationErrors {
+                    if (ve.message != "NormalizedString contains invalid characters \\r \\n \\t or \\r\\n".to_string())
+                    {
+                        messages.push_str(format!("{}, ", ve.message).as_str());
+                    }
+                }
+                messages
+            }
+
+            _ => "".to_string(),
+        }
+    }
+
     #[instrument(skip_all, fields(data_len={data.len()}), err)]
     pub fn parse(data: &[u8]) -> Result<Self, Error> {
         let mut err: Error = Default::default();
@@ -80,16 +98,11 @@ impl SBOM {
                         match result.passed() {
                             true => return Ok(SBOM::CycloneDX(bom)),
                             false => {
-                                let all_reasons = result
-                                    .errors()
-                                    // Ignore normalizedstring errors
-                                    // until https://github.com/CycloneDX/cyclonedx-rust-cargo/issues/737 is fixed
-                                    .filter(|(reason, _)| {
-                                        reason != "NormalizedString contains invalid characters \\r \\n \\t or \\r\\n"
-                                    })
-                                    .map(|(reason, _)| reason)
-                                    .collect::<Vec<String>>()
-                                    .join(", ");
+                                let all_reasons = if let Some(r) = result.error("serial_number") {
+                                    Self::check_message(r.clone())
+                                } else {
+                                    "".to_string()
+                                };
                                 if all_reasons.is_empty() {
                                     return Ok(SBOM::CycloneDX(bom));
                                 } else {
@@ -162,7 +175,7 @@ mod tests {
         assert!(e.cyclonedx.is_some());
         assert_eq!(
             e.cyclonedx.unwrap().to_string(),
-            "Failed to deserialize JSON: UrnUuid does not match regular expression"
+            "Failed to deserialize JSON: UrnUuid does not match regular expression, "
         );
     }
 
